@@ -9,7 +9,9 @@ import {
   ResponseObject,
 } from '@loopback/rest';
 import * as admin from 'firebase-admin';
+import fs from 'node:fs';
 import { request } from 'http';
+import { FcmTokenData } from '../utils/fcm-token-storage';
 
 export class PushNotificationController {
     constructor(@inject('firebaseAdmin') private firebaseAdmin: admin.app.App) {}
@@ -57,12 +59,33 @@ export class PushNotificationController {
       
       // Assuming 'token' is the device token you want to send the notification to
 
-      //extract fcm token from header
+      //send notification to fcm token
+      console.log(notification)
+
+      //get the json data from token.json for notification.targetToken
+      const tokenData = JSON.parse(fs.readFileSync("./src/repositories/token.json").toString())
+      console.log(tokenData)
+      //get the index of the token in tokenData
+
+      const index = tokenData.findIndex(
+        (entry:FcmTokenData) => entry.fcmToken === notification.targetToken
+      );
+      //get the orgid, userid and role from tokenData
+      const orgid = tokenData[index].orgid;
+      const userid = tokenData[index].userid;
+      const role = tokenData[index].role;
+      console.log(orgid, userid, role);
+      
       const payload: admin.messaging.Message = {
         notification: {
           title: notification.title,
-          body: notification.body,
+          body: JSON.parse(notification.body).message,
           imageUrl: notification.imageUrl,
+        },
+        data: {
+          orgid: orgid,
+          userid: userid,
+          role: role,
         },
         token: notification.targetToken,
       };

@@ -16,6 +16,7 @@ let fcmPromise = null;
 
 // Initialize Firebase app outside of the function
 const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
 function requestPermission() {
   console.log("Requesting permission...");
@@ -30,8 +31,6 @@ function requestPermission() {
     if (permission === "granted") {
       console.log("Notification permission granted.");
 
-      // Get the messaging object
-      const messaging = getMessaging(app);
 
       // Get the FCM token
       getToken(messaging,{vapidKey:"BKHGmf8HwXU5XcdGHVS1SkkLwvlsX0f2PQeFYI9qx_8xW18txKOcLuG3dCNpkEhRCVjZuG5j2gh6Kd8BquldTjU"}).then((currentToken) => {
@@ -48,25 +47,6 @@ function requestPermission() {
     }
   });
 }
-
-const subscribeToBroadcastTopic = async () => {
-  const messaging = getMessaging();
-
-  try {
-    // Get the FCM token
-    const currentToken = await getToken(messaging);
-    
-    // Subscribe the device to the 'broadcast' topic
-    await messaging.subscribeToTopic(currentToken, 'broadcast');
-
-    console.log(`Subscribed to 'broadcast' topic`);
-  } catch (error) {
-    console.error('Error subscribing to topic:', error);
-  }
-};
-
-// Call the function to subscribe when needed
-subscribeToBroadcastTopic();
 
 
 requestPermission();
