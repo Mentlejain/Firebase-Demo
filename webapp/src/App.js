@@ -104,35 +104,10 @@ const App = () => {
     }
   };
 
-  const handleSendCredentials = async () => {
-    try {
-      // Check if the browser supports service workers
-      if ('serviceWorker' in navigator) {
-        // Wait for the service worker to be ready
-        const registration = await navigator.serviceWorker.ready;
+  const handleSendCredentials = () => {
+    navigator.serviceWorker.controller.postMessage({ orgId: orgId, 'userId': userId, 'role': role });
+    console.log('Credentials sent to service worker');
 
-        // Check if there's an active service worker
-        if (registration.active) {
-          // Data to send to the service worker (replace with your credentials)
-          const credentialsData = {
-            orgId: orgId,
-            userId: userId,
-            role: role,
-          };
-
-          // Send data to the service worker
-          registration.active.postMessage(credentialsData);
-
-          console.log('Credentials sent to service worker:', credentialsData);
-        } else {
-          console.warn('No active service worker found.');
-        }
-      } else {
-        console.warn('Service workers are not supported in this browser.');
-      }
-    } catch (error) {
-      console.error('Error sending credentials:', error.message);
-    }
   };
 
   return (
@@ -230,9 +205,6 @@ const App = () => {
                 </button>
                 <button className="button is-primary" onClick={handleSetCredentials}>
                   Set Credentials
-                </button>
-                <button className="button is-primary" onClick={handleSendCredentials}>
-                Send Credentials to Service Worker
                 </button>
               </div>
             </div>

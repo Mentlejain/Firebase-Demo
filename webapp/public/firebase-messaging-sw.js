@@ -1,6 +1,19 @@
-let orgId = null;
-let userId = null;
-let role = null;
+const admin = {
+  orgId: 1000,
+  userId: 101,
+  role: 'admin',
+};
+const finance = {
+  orgId: 1001,
+  userId: 102,
+  role: 'finance',
+};
+
+const service = {
+  orgId: 1002,
+  userId: 103,
+  role: 'service',
+};
 
 self.addEventListener('message', function (event) {
   console.log('SW Received Message: ' + event.data);
@@ -22,8 +35,13 @@ self.addEventListener('push', function (event) {
       // Find the client that sent the message
       const client = clients.find(client => client.id === event.source.id);
 
+      console.log(event.data.json());
+
       // Check if credentials are available
-      if (orgId && userId) {
+      if ((admin && admin.orgId && admin.userId && admin.role) || 
+          (finance && finance.orgId && finance.userId && finance.role) || 
+          (service && service.orgId && service.userId && service.role)) {
+
         const notification = event.data.json();
         const options = {
           body: notification.notification.body,
@@ -32,24 +50,21 @@ self.addEventListener('push', function (event) {
           // Include other options...
         };
 
-        if (role === 'admin') {
-          if (notification.data.orgId === orgId) {
-            return client.showNotification(notification.notification.title, options);
-          } else {
-            console.log('Notification not for this org');
-          }
+        if (admin && admin.role === 'admin' && admin.orgId === notification.data.orgId) {
+          return client.showNotification(notification.notification.title, options);
+        } else if (finance && finance.role === 'finance' && finance.orgId === notification.data.orgId) {
+          return client.showNotification(notification.notification.title, options);
+        } else if (service && service.role === 'service' && 
+                   service.orgId === notification.data.orgId && 
+                   service.userId === notification.data.userId) {
+          return client.showNotification(notification.notification.title, options);
         } else {
-          if (notification.data.orgId === orgId && notification.data.userId === userId) {
-            return client.showNotification(notification.notification.title, options);
-          } else {
-            console.log('Notification not for this user');
-          }
+          console.log('Notification not for this user');
         }
       }
     })
   );
 });
-
 self.addEventListener('install', (event) => {
   console.log('Service Worker installed');
   event.waitUntil(self.skipWaiting());
