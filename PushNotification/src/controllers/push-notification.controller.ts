@@ -212,7 +212,7 @@ export class PushNotificationController {
       messaging.sendEachForMulticast(message)
   .then((response) => {
     if (response.failureCount > 0) {
-      const failedTokens: string | any[] = [];
+      const failedTokens = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
           failedTokens.push(registrationTokens[idx]);
