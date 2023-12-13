@@ -189,7 +189,7 @@ export class PushNotificationController {
     ): Promise<any> {
       // Use the FCM SDK to send push notifications
       const messaging = this.firebaseAdmin.messaging();
-//retriece the tokens from token.csv and store in registrationTokens
+  //retriece the tokens from token.csv and store in registrationTokens
       const tokenData = JSON.parse(fs.readFileSync("./src/repositories/token.json").toString())
       
       const registrationTokens = tokenData.map(
@@ -212,7 +212,7 @@ export class PushNotificationController {
       messaging.sendEachForMulticast(message)
   .then((response) => {
     if (response.failureCount > 0) {
-      const failedTokens = [];
+      const failedTokens: string | any[] = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
           failedTokens.push(registrationTokens[idx]);
