@@ -1,70 +1,44 @@
-import * as fs from 'fs';
-import { promisify } from 'util';
-
-const writeFileAsync = promisify(fs.writeFile);
-const readFileAsync = promisify(fs.readFile);
-
-interface FcmTokenData {
-  fcmToken: string;
-  orgid: string;
-  userid: string;
-  role: string;
-}
-
+import { FcmTokenRepository } from '../repositories'; // Import your FcmToken repository
+import {DbDataSource} from '../datasources';
 export class FcmTokenStorage {
   private static instance: FcmTokenStorage;
-  private readonly filePath: string = './src/repositories/token.json';
 
-  private constructor(private lastActiveUser: any) {}
+  private constructor(
+    private fcmTokenRepo: FcmTokenRepository,
+  ) {}
 
-  static getInstance(lastActiveUser: any): FcmTokenStorage {
+  public static getInstance(): FcmTokenStorage {
     if (!FcmTokenStorage.instance) {
-      FcmTokenStorage.instance = new FcmTokenStorage(lastActiveUser);
+      const dataSource = new DbDataSource();
+      FcmTokenStorage.instance = new FcmTokenStorage(
+        new FcmTokenRepository(dataSource),
+      );
     }
     return FcmTokenStorage.instance;
   }
 
-  async storeFcmToken(tokenData: FcmTokenData): Promise<void> {
-    try {
-      let existingData: FcmTokenData[] = [];
-
-      // Read existing data if the file already exists
-      if (fs.existsSync(this.filePath)) {
-        const fileContent = await readFileAsync(this.filePath, 'utf-8');
-
-        // Handle the case where the file is empty or doesn't contain valid JSON
-        existingData = fileContent ? JSON.parse(fileContent) : [];
-      }
-
-      // Find the index of the existing entry by fcmToken
-      const index = existingData.findIndex(
-        entry => entry.fcmToken === tokenData.fcmToken
-      );
-
-      if (index !== -1) {
-        // Update orgid, userid, and role for the same fcmtoken
-        existingData[index].orgid = tokenData.orgid;
-        existingData[index].userid = tokenData.userid;
-        existingData[index].role = tokenData.role;
-        console.log('Updated credentials associated with the token');
-      } else {
-        // Append the new token data
-        existingData.push(tokenData);
-      }
-
-      // Write the updated data to the JSON file
-      await writeFileAsync(this.filePath, JSON.stringify(existingData, null, 2), 'utf-8');
-
-      this.lastActiveUser[tokenData.fcmToken] = {
-        orgid: tokenData.orgid,
-        userid: tokenData.userid,
-        role: tokenData.role
-      };
-
-    } catch (error) {
-      console.error('Failed to store fcm token:', error);
+  public static async updateFcmToken(userId: number, fcmToken: string) {
+    const instance = await FcmTokenStorage.instance.fcmTokenRepo.findOne({
+      where: { userId, fcmToken },
+    });
+    if (instance) {
+      instance.timestamp = new Date();
+      instance.fcmToken = fcmToken;
+      await FcmTokenStorage.instance.fcmTokenRepo.update(instance);
+    }
+    else {
+      await FcmTokenStorage.instance.fcmTokenRepo.create({
+        userId,
+        fcmToken,
+        timestamp: new Date(),
+      });
     }
   }
-}
 
-export { FcmTokenData };
+  public static async getUserFcmTokens(userId: number) {
+    const instances = await FcmTokenStorage.instance.fcmTokenRepo.find({
+      where: { userId },
+    });
+    return instances.map((instance) => instance.fcmToken);
+  }
+}

@@ -7,14 +7,19 @@ import {
   response,
   requestBody,
   ResponseObject,
+  param,
 } from '@loopback/rest';
 import * as admin from 'firebase-admin';
 import fs from 'node:fs';
 import { request } from 'http';
-import { FcmTokenData } from '../utils/fcm-token-storage';
+import { UserStorage } from '../utils/user-storage';
+import { FcmTokenStorage } from '../utils/fcm-token-storage';
 
 export class PushNotificationController {
-    constructor(@inject('firebaseAdmin') private firebaseAdmin: admin.app.App) {}
+  private FcmTokenStorage: FcmTokenStorage;
+    constructor(@inject('firebaseAdmin') private firebaseAdmin: admin.app.App) {
+      this.FcmTokenStorage = FcmTokenStorage.getInstance();
+    }
   
     @post('/push-notification')
 
@@ -67,14 +72,6 @@ export class PushNotificationController {
       console.log(tokenData)
       //get the index of the token in tokenData
 
-      const index = tokenData.findIndex(
-        (entry:FcmTokenData) => entry.fcmToken === notification.targetToken
-      );
-      //get the orgid, userid and role from tokenData
-      const orgid = tokenData[index].orgid;
-      const userid = tokenData[index].userid;
-      const role = tokenData[index].role;
-      console.log(orgid, userid, role);
       
       const payload: admin.messaging.Message = {
         notification: {
@@ -82,11 +79,11 @@ export class PushNotificationController {
           body: JSON.parse(notification.body).message,
           imageUrl: notification.imageUrl,
         },
-        data: {
-          orgid: orgid,
-          userid: userid,
-          role: role,
-        },
+        // data: {
+        //   orgid: orgid,
+        //   userid: userid,
+        //   role: role,
+        // },
         token: notification.targetToken,
       };
   
@@ -151,14 +148,14 @@ export class PushNotificationController {
       };
     }
 
-    @post('/push-notifications')
+    @post('/push-notification-user/{userId}')
     @response(200, {
-      description: 'Send push notifications',
+      description: 'Send push notification to org',
       content: {
         'application/json': {
           schema: {
             type: 'object',
-            title: 'PushNotificationsResponse',
+            title: 'PushNotificationOrgResponse',
             properties: {
               success: { type: 'boolean' },
               response: { type: 'object' },
@@ -167,67 +164,50 @@ export class PushNotificationController {
         },
       },
     })
-    async sendPushNotifications(
+    async sendPushNotificationToUser(
+      @param.path.number('userId') userId: number,
       @requestBody({
         content: {
           'application/json': {
             schema: {
               type: 'object',
-              title: 'PushNotificationsRequest',
+              title: 'PushNotificationOrgRequest',
               properties: {
-                groupName: { type: 'string' },
                 title: { type: 'string' },
                 body: { type: 'string' },
                 imageUrl: { type: 'string' },
               },
             },
-            required: ['groupName', 'title', 'body'],
+            required: ['title', 'body'],
           },
         },
       })
       notification: any,
     ): Promise<any> {
-      // Use the FCM SDK to send push notifications
+      const tokens = await FcmTokenStorage.getUserFcmTokens(userId)
+
       const messaging = this.firebaseAdmin.messaging();
-  //retriece the tokens from token.csv and store in registrationTokens
-      const tokenData = JSON.parse(fs.readFileSync("./src/repositories/token.json").toString())
-      
-      const registrationTokens = tokenData.map(
-        (entry:FcmTokenData) => entry.fcmToken
-      );
-  
-      const message = {
+
+      let message = {
         notification: {
           title: notification.title,
           body: notification.body,
           imageUrl: notification.imageUrl,
         },
-        tokens: registrationTokens ,
+        data: {
+          test: 'test',
+        },
+        tokens: tokens,
       };
-  
-      const options: admin.messaging.MessagingOptions = {
-        priority: 'high',
-      };
-  
       messaging.sendEachForMulticast(message)
-  .then((response) => {
-    if (response.failureCount > 0) {
-      const failedTokens: string | any[] = [];
-      response.responses.forEach((resp, idx) => {
-        if (!resp.success) {
-          failedTokens.push(registrationTokens[idx]);
-        }
+      .then((response) => {
+        console.log(response.successCount + ' messages were sent successfully');
       });
-      console.log('List of tokens that caused failures: ' + failedTokens);
-    }
-  });
-  
       return {
         success: true,
-        response,
       };
-    }
 
+    }
     @post('/broadcast-push-notification')
     @response(200, {
       description: 'Broadcast push notification',
