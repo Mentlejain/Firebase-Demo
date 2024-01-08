@@ -1,5 +1,5 @@
 // src/controllers/fcm-token.controller.ts
-import { post, requestBody, HttpErrors } from '@loopback/rest';
+import { post, requestBody, HttpErrors, del } from '@loopback/rest';
 import { FcmTokenStorage } from '../utils/fcm-token-storage';
 
 export class FcmTokenController {
@@ -20,12 +20,11 @@ export class FcmTokenController {
               title: 'FcmTokenStorageRequest',
               properties: {
                 fcmToken: {type: 'string'},
-                orgId: {type: 'string'},
                 userId: {type: 'string'},
-                role: {type: 'string'},
+                timestamp: {type: 'string'},
               },
             },
-            required: ['fcmToken', 'orgId', 'userId', 'role'],
+            required: ['fcmToken', 'userId'],
           },
         },
       },
@@ -48,4 +47,36 @@ export class FcmTokenController {
       throw new HttpErrors.InternalServerError(err);
     }
 }
+
+ @del('/delete-fcm-token')
+
+  async deleteFcmToken(
+    @requestBody(
+      {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              title: 'FcmTokenStorageRequest',
+              properties: {
+                fcmToken: {type: 'string'},
+              },
+            },
+            required: ['fcmToken'],
+          },
+        },
+      },
+    ) fcmTokenRequest: any,
+  ): Promise<any> {
+    try {
+      await FcmTokenStorage.deleteFcmToken(
+        fcmTokenRequest.fcmToken
+      );
+      return {
+        status: 'success',
+      };
+    } catch (err) {
+      throw new HttpErrors.InternalServerError(err);
+    }
+  }
 }

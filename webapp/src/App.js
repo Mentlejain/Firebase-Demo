@@ -12,7 +12,7 @@ const App = () => {
     if ('serviceWorker' in navigator) {
       // Register the service worker
       navigator.serviceWorker.ready.then(registration => {
-        registration.active.postMessage({ 'orgid': orgId, 'userid': userId , 'role': role});
+        registration.active.postMessage({ 'orgId': orgId, 'userId': userId , 'role': role});
       });
     }
   }, );

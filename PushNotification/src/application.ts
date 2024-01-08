@@ -40,7 +40,6 @@ export class PushNotificationApplication extends BootMixin(
     this.bind('firebaseAdmin').to(firebaseAdminApp);
 
     this.bind('lastActiveUser').toDynamicValue(() => {
-      // Initialize lastActiveUser here if needed
       return {};
     }).inScope(BindingScope.SINGLETON);
 
@@ -54,15 +53,15 @@ export class PushNotificationApplication extends BootMixin(
   
   // Subscribe the devices corresponding to the registration tokens to the
   // topic.
-  messaging.subscribeToTopic(registrationTokens, "broadcast")
-    .then((response) => {
-      // See the MessagingTopicManagementResponse reference documentation
-      // for the contents of response.
-      console.log('Successfully subscribed to topic:', response);
-    })
-    .catch((error) => {
-      console.log('Error subscribing to topic:', error);
-    });
+  // messaging.subscribeToTopic(registrationTokens, "broadcast")
+  //   .then((response) => {
+  //     // See the MessagingTopicManagementResponse reference documentation
+  //     // for the contents of response.
+  //     console.log('Successfully subscribed to topic:', response);
+  //   })
+  //   .catch((error) => {
+  //     console.log('Error subscribing to topic:', error);
+  //   });
 
     // Customize @loopback/rest-explorer configuration here
     this.configure(RestExplorerBindings.COMPONENT).to({

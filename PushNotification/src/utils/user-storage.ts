@@ -1,8 +1,10 @@
 import { UserRepository } from '../repositories';
 import {DbDataSource} from '../datasources';
+import { inject } from '@loopback/core';
+import * as admin from 'firebase-admin';
 export class UserStorage {
   private static instance: UserStorage;
-
+  @inject('firebaseAdmin') private firebaseAdmin: admin.app.App
   private constructor(
     private userRepo: UserRepository,
   ) {}
@@ -17,30 +19,36 @@ export class UserStorage {
     return UserStorage.instance;
   }
 
-  public async createUser(userId: number, orgId: number, role: string, isActive: boolean) {
+  /**
+   * 
+   * @param userId  User identifier, of type number
+   * @param orgId  Organization identifier, of type number
+   * @param role  Role of the user in the organization, of type string
+   * @param isActive  Notification status for the associated organization, of type boolean
+   */
+  public async createUser(userId: number, orgId: number, role: string, isActive: boolean=true) {
     try{
-        console.log("inside create user");
-        console.log(await this.userRepo.find());
-        // this.userRepo.
-        const instance = await this.userRepo.findOne({
-        where: { userId },
+          const instance = await this.userRepo.findOne({
+          where: { userId },
         });
-        console.log("instance",instance);
-        if (instance) {
-        throw new Error('User already exists');
-        }
-        else {
-        await UserStorage.instance.userRepo.create({
-            userId, orgId, role,isActive
-        });
-        }}
+          if (instance) {
+          throw new Error('User already exists');
+          }
+          else {
+            await UserStorage.instance.userRepo.create({ userId, orgId, role,isActive});
+          }
+      }
         catch(err){
           console.log(err);
             throw new Error(err);
         }
   }
-
-  //delete user from a particular org
+  /**
+   * Delete user from an organization
+   * 
+   * @param userId User identifier, of type number
+   * @param orgId Organization identifier, of type number
+   */
   public async deleteUserFromOrg(userId: number, orgId: number) {
     const instance = await this.userRepo.findOne({
       where: { userId, orgId },
@@ -52,7 +60,11 @@ export class UserStorage {
       throw new Error('User does not exists');
     }
   }
-
+    /**
+     * Delete user from all organizations
+     * @param userId User identifier, of type number
+     * 
+    */
     //delete user from all orgs
     public async deleteUserFromExistence(userId: number) {
         const instances = await this.userRepo.find({

@@ -1,5 +1,7 @@
 import { FcmTokenRepository } from '../repositories'; // Import your FcmToken repository
 import {DbDataSource} from '../datasources';
+import { inject } from '@loopback/core';
+import * as admin from 'firebase-admin';
 export class FcmTokenStorage {
   private static instance: FcmTokenStorage;
 
@@ -32,6 +34,18 @@ export class FcmTokenStorage {
         fcmToken,
         timestamp: new Date(),
       });
+    }
+  }
+
+  public static async deleteFcmToken(fcmToken: string) {
+    const instance = await FcmTokenStorage.instance.fcmTokenRepo.findOne({
+      where: {fcmToken },
+    });
+    if (instance) {
+      await FcmTokenStorage.instance.fcmTokenRepo.delete(instance);
+    }
+    else {
+      throw new Error('FcmToken does not exists');
     }
   }
 

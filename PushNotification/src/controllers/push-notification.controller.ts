@@ -17,6 +17,7 @@ import { FcmTokenStorage } from '../utils/fcm-token-storage';
 
 export class PushNotificationController {
   private FcmTokenStorage: FcmTokenStorage;
+  messaging = this.firebaseAdmin.messaging();
     constructor(@inject('firebaseAdmin') private firebaseAdmin: admin.app.App) {
       this.FcmTokenStorage = FcmTokenStorage.getInstance();
     }
@@ -60,7 +61,7 @@ export class PushNotificationController {
       ) notification: any,
     ): Promise<any> {
       // Use the FCM SDK to send push notifications
-      const messaging = this.firebaseAdmin.messaging();
+      
       
       // Assuming 'token' is the device token you want to send the notification to
 
@@ -80,8 +81,8 @@ export class PushNotificationController {
           imageUrl: notification.imageUrl,
         },
         // data: {
-        //   orgid: orgid,
-        //   userid: userid,
+        //   orgId: orgId,
+        //   userId: userId,
         //   role: role,
         // },
         token: notification.targetToken,
@@ -91,7 +92,7 @@ export class PushNotificationController {
         priority: 'high',
       };
   
-      const response = await messaging.send(payload);
+      const response = await this.messaging.send(payload);
   
       return {
         success: true,
@@ -133,9 +134,8 @@ export class PushNotificationController {
       group: any,
     ): Promise<any> {
       // Use the FCM SDK to register a device group
-      const messaging = this.firebaseAdmin.messaging();
   
-      const response = await messaging
+      const response = await this.messaging
         .subscribeToTopic(group.tokens, group.groupName)
         .catch(error => {
           console.error('Failed to register group:', error);
@@ -186,8 +186,6 @@ export class PushNotificationController {
     ): Promise<any> {
       const tokens = await FcmTokenStorage.getUserFcmTokens(userId)
 
-      const messaging = this.firebaseAdmin.messaging();
-
       let message = {
         notification: {
           title: notification.title,
@@ -199,7 +197,8 @@ export class PushNotificationController {
         },
         tokens: tokens,
       };
-      messaging.sendEachForMulticast(message)
+      console.log('Sending push notification to user:', userId, 'with tokens:', tokens);
+      this.messaging.sendEachForMulticast(message)
       .then((response) => {
         console.log(response.successCount + ' messages were sent successfully');
       });
@@ -244,7 +243,6 @@ export class PushNotificationController {
       notification: any,
     ): Promise<any> {
       // Use the FCM SDK to broadcast push notifications
-      const messaging = this.firebaseAdmin.messaging();
   
       const payload: admin.messaging.Message = {
         notification: {
@@ -259,7 +257,7 @@ export class PushNotificationController {
         priority: 'high',
       };
   
-      const response = await messaging.send(payload);
+      const response = await this.messaging.send(payload);
   
       return {
         success: true,

@@ -12,24 +12,29 @@ export class UserMap extends Entity {
     type: 'number',
     required: true,
     id: true,
+    postgresql: {columnName: 'userId'}
   })
   userId: number;
 
   @property({
     type: 'number',
     required: true,
+    id: true,
+    postgresql: {columnName: 'orgId'}
   })
   orgId: number;
 
   @property({
     type: 'string',
     required: true,
+    postgresql: {columnName: 'role'}
   })
   role: string;
 
   @property({
     type: 'boolean',
     required: true,
+    postgresql: {columnName: 'isActive'}
   })
   isActive: boolean;
 
