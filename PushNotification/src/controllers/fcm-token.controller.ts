@@ -1,12 +1,12 @@
 // src/controllers/fcm-token.controller.ts
 import { post, requestBody, HttpErrors, del } from '@loopback/rest';
-import { FcmTokenStorage } from '../utils/fcm-token-storage';
+import { FcmTokenManagement } from '../utils/fcm-token-management';
 
 export class FcmTokenController {
-  private fcmTokenStorage: FcmTokenStorage;
+  private FcmTokenManagement: FcmTokenManagement;
 
   constructor() {
-    this.fcmTokenStorage = FcmTokenStorage.getInstance();
+    this.FcmTokenManagement = FcmTokenManagement.getInstance();
   }
 
   @post('/store-fcm-token')
@@ -17,7 +17,7 @@ export class FcmTokenController {
           'application/json': {
             schema: {
               type: 'object',
-              title: 'FcmTokenStorageRequest',
+              title: 'FcmTokenManagementRequest',
               properties: {
                 fcmToken: {type: 'string'},
                 userId: {type: 'string'},
@@ -36,7 +36,7 @@ export class FcmTokenController {
     //if present, update timestamp
     //return success
     try {
-      await FcmTokenStorage.updateFcmToken(
+      await FcmTokenManagement.updateFcmToken(
         fcmTokenRequest.userId,
         fcmTokenRequest.fcmToken,
       );
@@ -57,7 +57,7 @@ export class FcmTokenController {
           'application/json': {
             schema: {
               type: 'object',
-              title: 'FcmTokenStorageRequest',
+              title: 'FcmTokenManagementRequest',
               properties: {
                 fcmToken: {type: 'string'},
               },
@@ -69,7 +69,7 @@ export class FcmTokenController {
     ) fcmTokenRequest: any,
   ): Promise<any> {
     try {
-      await FcmTokenStorage.deleteFcmToken(
+      await FcmTokenManagement.deleteFcmToken(
         fcmTokenRequest.fcmToken
       );
       return {

@@ -14,6 +14,7 @@ import { initializeApp } from "firebase-admin/app";
 import { getMessaging } from "firebase-admin/messaging";
 
 import fs from 'node:fs';
+import { KafkaConsumerService } from './services/kafka.service';
 
 export {ApplicationConfig};
 
@@ -22,6 +23,9 @@ export class PushNotificationApplication extends BootMixin(
 ) {
   constructor(options: ApplicationConfig = {}) {
     super(options);
+
+    // Bind KafkaConsumerService as a singleton
+    this.bind('services.KafkaConsumerService').toClass(KafkaConsumerService).inScope(BindingScope.SINGLETON);
 
     // Set up the custom sequence
     this.sequence(MySequence);
@@ -38,10 +42,6 @@ export class PushNotificationApplication extends BootMixin(
     const firebaseAdminApp = admin.initializeApp(firebaseAdminConfig);
 
     this.bind('firebaseAdmin').to(firebaseAdminApp);
-
-    this.bind('lastActiveUser').toDynamicValue(() => {
-      return {};
-    }).inScope(BindingScope.SINGLETON);
 
   // Initialize Firebase Cloud Messaging and get a reference to the service
   const messaging = getMessaging(firebaseAdminApp);
@@ -78,6 +78,15 @@ export class PushNotificationApplication extends BootMixin(
         extensions: ['.controller.js'],
         nested: true,
       },
+    };
+
+    // Include KafkaConsumerService in the start method
+    this.start = async () => {
+      // Start Kafka consumer service
+      await (await this.get<KafkaConsumerService>('services.KafkaConsumerService')).start();
+
+      // Start the application
+      return super.start();
     };
   }
 }

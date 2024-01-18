@@ -12,14 +12,13 @@ import {
 import * as admin from 'firebase-admin';
 import fs from 'node:fs';
 import { request } from 'http';
-import { UserStorage } from '../utils/user-storage';
-import { FcmTokenStorage } from '../utils/fcm-token-storage';
+import { FcmTokenManagement } from '../utils/fcm-token-management';
 
 export class PushNotificationController {
-  private FcmTokenStorage: FcmTokenStorage;
+  private FcmTokenManagement: FcmTokenManagement;
   messaging = this.firebaseAdmin.messaging();
     constructor(@inject('firebaseAdmin') private firebaseAdmin: admin.app.App) {
-      this.FcmTokenStorage = FcmTokenStorage.getInstance();
+      this.FcmTokenManagement = FcmTokenManagement.getInstance();
     }
   
     @post('/push-notification')
@@ -165,7 +164,7 @@ export class PushNotificationController {
       },
     })
     async sendPushNotificationToUser(
-      @param.path.number('userId') userId: number,
+      @param.path.number('userId') userId: string,
       @requestBody({
         content: {
           'application/json': {
@@ -184,7 +183,7 @@ export class PushNotificationController {
       })
       notification: any,
     ): Promise<any> {
-      const tokens = await FcmTokenStorage.getUserFcmTokens(userId)
+      const tokens = await FcmTokenManagement.getUserFcmTokens(userId)
 
       let message = {
         notification: {

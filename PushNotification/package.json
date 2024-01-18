@@ -55,9 +55,12 @@
     "@loopback/rest": "^13.1.2",
     "@loopback/rest-explorer": "^6.1.2",
     "@loopback/service-proxy": "^6.1.2",
+    "axios": "^1.6.5",
+    "base-64": "^1.0.0",
     "fast-csv": "^4.3.6",
     "firebase": "^10.7.0",
     "firebase-admin": "^11.11.0",
+    "geo-tz": "^8.0.0",
     "loopback-connector-postgresql": "^7.0.1",
     "tslib": "^2.0.0"
   },

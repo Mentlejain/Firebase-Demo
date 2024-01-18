@@ -1,0 +1,47 @@
+export const maxLength = 30;
+export const stringMaxLength = 30;
+export const auth0OrgIdMaxLength = 30;
+export const tipEntityIdMaxLength = 40;
+export const orgDisplayNameMaxLength = 30;
+export const orgDisplayNameMinLength = 3;
+export const addressLineMaxLength = 256;
+export const stateMaxLength = 30;
+export const cityMaxLength = 30;
+export const zipCodeMaxLength = 30;
+export const dateMaxLength = 30;
+export const orgNameMaxLength = 30;
+export const roleNameMaxLength = 30;
+export const auth0UserIdMaxLength = 40; 
+export const userNameMaxLength = 30;
+export const phoneMaxLength = 20;
+export const emailMaxLength = 320;
+export const minLengthString = 3;
+export const notesPropertyLength = 320
+// export const INVITE_USER : string = "INVITE_USER"
+// export const INVITE_ORG : string = "INVITE_ORG"
+// export const UNSUBSCRIBE_USER : string = "UNSUBSCRIBE_USER"
+// export const SUBSCRIBE_USER : string = "SUBSCRIBE_USER"
+// export const BROADCAST : string = "BROADCAST"
+export const ORGANIZATION_TYPE_SHASTA = "Shasta"
+export const ORGANIZATION_TYPE_MSP = "MSP"
+export const ORGANIZATION_TYPE_BUSINESS = "Business"
+export const PLATFORM_ADMIN_ROLE : string = "Platform-Admin"
+export const PLATFORM_SUPPORT_ROLE : string = "Platform-Support"
+export const ORGANIZATION_ADMIN_ROLE : string = "MSP-Admin"
+export const ORGANIZATION_SUPPORT_ROLE : string = "Organization-Support"
+
+//export const FORGOT_PASSWORD: string = 'FORGOT_PASSWORD'
+export const FORGOT_EMAIL_LINK_EXPIRY = 86400
+export const FORGOT_EMAIL_LIMIT = 5
+
+export const ENV_LOCAL = 'local'
+export const ENV_DEV = 'dev'
+export const ENV_TESTING = 'testing'
+export const ENV_STAGING = 'staging'
+export const ENV_PROD = 'prod'
+
+export const venueNameMaxLength = 30;
+export const floorPlanMaxLength = 30;
+export const tipVenueIdMaxLength = 30;
+export const D3FORMAT = ['dxf', 'obj']
+export const D2FORMAT = ['png','jpg', 'jpeg']

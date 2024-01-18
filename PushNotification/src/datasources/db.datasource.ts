@@ -15,7 +15,7 @@ export class DbDataSource extends juggler.DataSource
       port: 5432,
       user: 'postgres',
       password: 'admin',
-      database: 'notification service'
+      database: 'test'
     },
   ) {
     super(dsConfig);
